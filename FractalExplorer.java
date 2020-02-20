@@ -143,6 +143,8 @@ public class FractalExplorer {
 		fractals.add(new Mandelbrot());
 		
 		// ---Добавлять новые фракталы сюда---		
+		fractals.add(new Tricorn());
+		fractals.add(new BurningShip());
 	}
 	
 	/*
