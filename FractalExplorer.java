@@ -13,7 +13,7 @@ import java.io.IOException;
 /*
 * Проблемы:
 * 1. Выводится только один фильтр в диалоговом окне
-* 2. Нужно получать выбранный фильтр, а не дописывать его
+* 2. Нужно получать выбранный фильтр, а не дописывать его - решено
 * 3. Нет возможности перезаписывать файлы
 */
 
@@ -80,11 +80,15 @@ public class FractalExplorer {
 			
 			// Настройка имени
 			fchooser.setDialogTitle("Choose path");
-			fchooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			//fchooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 			
 			// Настройка фильтров
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG Images", "*.png"); 
-			fchooser.setFileFilter(filter);
+			//FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG Images", "*.png"); 
+			//fchooser.setFileFilter(filter);
+			fchooser.addChoosableFileFilter(new FileNameExtensionFilter("PNG Images", "*.png"));
+			fchooser.addChoosableFileFilter(new FileNameExtensionFilter("JPEG Images", "*.jpeg"));
+			fchooser.addChoosableFileFilter(new FileNameExtensionFilter("BMP Images", "*.bmp"));
+
 			fchooser.setAcceptAllFileFilterUsed(false); 
 			
 			// Пользователь выбрал файл или нажал "отмена"
@@ -97,21 +101,32 @@ public class FractalExplorer {
 			}
 			
 			// Получение полного пути
-			nowPath = fchooser.getSelectedFile();
-			nowPath = new File(nowPath.getPath() + nowPath.getName() + ".png");
-			System.out.println(nowPath.getAbsoluteFile());
+			String ext = "";
+			String extension = fchooser.getFileFilter().getDescription();
+			System.out.println("Desctiption = " + extension);
+			
+			if (extension.equals("PNG Images")) ext = "png";
+			if (extension.equals("JPEG Images")) ext = "jpeg";
+			if (extension.equals("BMP Images")) ext = "bmp";
+			//nowPath = fchooser.getSelectedFile();
+			//nowPath = new File(nowPath.getPath() + nowPath.getName() + ".png");
+			//System.out.println(nowPath.getAbsoluteFile());
+			//System.out.println("getPath = " + fchooser.getSelectedFile().getPath());
+			//System.out.println("getName = " + fchooser.getSelectedFile().getName());
+			nowPath = new File(fchooser.getSelectedFile().getPath() + "." + ext);
+			System.out.println("Full name = " + nowPath);
 			
 			// Запись файла на диск
 			try 
 			{                               
-				ImageIO.write(display.getImage(), "png", nowPath);
+				ImageIO.write(display.getImage(), ext, nowPath);
 				System.out.println("Write image success!");
 				JOptionPane.showMessageDialog(FractalExplorer.this.frame, "Save is success!", "File save", JOptionPane.INFORMATION_MESSAGE);
 			} catch (IOException e) {
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(FractalExplorer.this.frame, "Save is failed!", "File save", JOptionPane.WARNING_MESSAGE);
 			}
-	
+			
 		}
 	}
 	
