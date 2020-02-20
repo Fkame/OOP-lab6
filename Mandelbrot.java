@@ -49,4 +49,9 @@ public class Mandelbrot extends FractalGenerator{
 		else 
 			return iteration;
 	}
+	
+	@Override
+	public String toString() {
+		return "Mandelbrot";
+	}
 }

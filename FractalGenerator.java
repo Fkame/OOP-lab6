@@ -64,4 +64,8 @@ public abstract class FractalGenerator {
      * результатом -1.
      */
     public abstract int numIterations(double x, double y);
+	
+	public String toString() {
+		return "Fractal Generator";
+	}
 }
