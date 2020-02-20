@@ -85,4 +85,8 @@ public class JImageDisplay extends JPanel {
 		g.fillRect(bImg.getWidth() / 2 - 7, bImg.getHeight() / 2 - 7, 13, 13);
 		this.repaint();
 	}
+	
+	public BufferedImage getImage() {
+		return bImg;
+	}
 }

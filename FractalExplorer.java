@@ -3,6 +3,19 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.io.File;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+
+/*
+* Проблемы:
+* 1. Выводится только один фильтр в диалоговом окне
+* 2. Нужно получать выбранный фильтр, а не дописывать его
+* 3. Нет возможности перезаписывать файлы
+*/
 
 public class FractalExplorer {
 	
@@ -29,6 +42,9 @@ public class FractalExplorer {
 	// Фракталы
 	private ArrayList<FractalGenerator> fractals;
 	
+	// Текущая директория
+	private File nowPath = null;
+	
 	/*
 	* Классы-слушатели событий кнопки сброса и сохранения, и мыши
 	*/
@@ -51,6 +67,51 @@ public class FractalExplorer {
 	private class saveButtonListener implements ActionListener {
 		public void actionPerformed(ActionEvent event) {
 			System.out.println("Save button clicked!");
+			
+			// Диалоговое окно
+			JFileChooser fchooser;
+			
+			// Создание диалогового окна для получения пути сохранения файла
+			if (nowPath == null) {
+				fchooser = new JFileChooser();		
+			} else {
+				fchooser = new JFileChooser(nowPath);
+			}
+			
+			// Настройка имени
+			fchooser.setDialogTitle("Choose path");
+			fchooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			
+			// Настройка фильтров
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG Images", "*.png"); 
+			fchooser.setFileFilter(filter);
+			fchooser.setAcceptAllFileFilterUsed(false); 
+			
+			// Пользователь выбрал файл или нажал "отмена"
+			int result = fchooser.showSaveDialog(frame);	
+			if (result == JFileChooser.APPROVE_OPTION) {
+				System.out.println("Directory get");
+			} else {
+				System.out.println("Directory get ERROR");
+				return;
+			}
+			
+			// Получение полного пути
+			nowPath = fchooser.getSelectedFile();
+			nowPath = new File(nowPath.getPath() + nowPath.getName() + ".png");
+			System.out.println(nowPath.getAbsoluteFile());
+			
+			// Запись файла на диск
+			try 
+			{                               
+				ImageIO.write(display.getImage(), "png", nowPath);
+				System.out.println("Write image success!");
+				JOptionPane.showMessageDialog(FractalExplorer.this.frame, "Save is success!", "File save", JOptionPane.INFORMATION_MESSAGE);
+			} catch (IOException e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(FractalExplorer.this.frame, "Save is failed!", "File save", JOptionPane.WARNING_MESSAGE);
+			}
+	
 		}
 	}
 	
