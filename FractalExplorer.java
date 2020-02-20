@@ -28,24 +28,29 @@ public class FractalExplorer {
 	
 	// Фракталы
 	private ArrayList<FractalGenerator> fractals;
-	//private Mandelbrot mandelbrot;
 	
 	/*
 	* Классы-слушатели событий кнопки сброса и сохранения, и мыши
 	*/
 	private class resetButtonListener implements ActionListener {
 		public void actionPerformed(ActionEvent event) {
-			//System.out.println("Reset button clicked!");
+			System.out.println("Reset button clicked!");
 			
 			// Сброс границ фрактала и вызов функции отрисовки
-			//mandelbrot.getInitialRange(range);
-			//FractalExplorer.this.drawFractal();
+			int index = chooseF.getSelectedIndex();
+			if (index >= fractals.size()) {
+				FractalExplorer.this.setStartImage();
+				return;
+			}
+			
+			fractals.get(index).getInitialRange(range);
+			FractalExplorer.this.drawFractal(index);
 		}
 	}
 	
 	private class saveButtonListener implements ActionListener {
 		public void actionPerformed(ActionEvent event) {
-			//System.out.println("Save button clicked!");
+			System.out.println("Save button clicked!");
 		}
 	}
 	
@@ -53,7 +58,10 @@ public class FractalExplorer {
 		
 		// Событие нажатия на кнопку мыщи
 		public void mouseClicked(MouseEvent e) {
-			//System.out.println("Mouse button clicked!");
+			System.out.println("Mouse button clicked!");
+			
+			int index = chooseF.getSelectedIndex();
+			if (index >= fractals.size()) return;
 			
 			// Координаты клика мыши
 			int x = e.getX();
@@ -66,17 +74,17 @@ public class FractalExplorer {
 			// Нажатие левой кнопкой мыши
 			if (e.getButton() == MouseEvent.BUTTON1) {
 				// Масштабирование
-				//mandelbrot.recenterAndZoomRange(range, xCoord, yCoord, 0.5);
+				fractals.get(index).recenterAndZoomRange(range, xCoord, yCoord, 0.5);
 			}
 			
 			// Нажатие правой кнопкой мыши
 			if (e.getButton() == MouseEvent.BUTTON3) {
 				// Масштабирование
-				//mandelbrot.recenterAndZoomRange(range, xCoord, yCoord, 1.5);
+				fractals.get(index).recenterAndZoomRange(range, xCoord, yCoord, 1.5);
 			}
 			
 			// Перерисовка фрактала
-			//FractalExplorer.this.drawFractal();	
+			FractalExplorer.this.drawFractal(index);	
 		}
 		
 		/*
@@ -91,6 +99,26 @@ public class FractalExplorer {
         public void mouseReleased(MouseEvent e) {}
 	}
 	
+	private class comboBoxClickListener implements ActionListener {
+		public void actionPerformed(ActionEvent event) {
+			
+			System.out.println("Click in ComboBox on " + chooseF.getSelectedItem());
+			
+			// За основу взята идея, что индекс из ComboBox соответствует индексу в ArrayList
+			int index = chooseF.getSelectedIndex();
+			
+			if (index >= fractals.size()) {
+				FractalExplorer.this.setStartImage();
+				return;
+			}
+			
+			// Настройка начального диапазона фрактала
+			fractals.get(index).getInitialRange(range);
+			
+			// Вызов функции рисования
+			FractalExplorer.this.drawFractal(index);
+		}
+	}
 	
 	/*
 	* Конструкторы
@@ -113,10 +141,8 @@ public class FractalExplorer {
 		// Создание объектов Фракталов
 		fractals = new ArrayList<FractalGenerator>();
 		fractals.add(new Mandelbrot());
-		//this.mandelbrot = new Mandelbrot();
 		
-		// Задание пределов фрактала
-		// mandelbrot.getInitialRange(range);	
+		// ---Добавлять новые фракталы сюда---		
 	}
 	
 	/*
@@ -148,11 +174,19 @@ public class FractalExplorer {
 		textF.setFont(font);
 		northP.add(this.textF);
 		
-		// Создание и добавление списка
+		// Создание и заполнение списка элементами
 		this.chooseF = new JComboBox();
 		for (int i = 0; i < fractals.size(); i++) {
 			chooseF.addItem(fractals.get(i).toString());
 		}
+		
+		// Доавление начального пустого элемента
+		chooseF.addItem("-Empty-");
+		
+		// Установка флага на пустом элементе
+		chooseF.setSelectedIndex(fractals.size());
+		
+		// Задание размера и добавление на панель
 		this.chooseF.setPreferredSize(new Dimension(frame.getWidth() / 4, 30));
 		northP.add(this.chooseF);
 		
@@ -176,9 +210,9 @@ public class FractalExplorer {
 		// Добавление слушателей нажатия на кнопки
 		resetB.addActionListener(new resetButtonListener());
 		saveB.addActionListener(new saveButtonListener());
+		chooseF.addActionListener(new comboBoxClickListener());
 		
 		frame.setVisible(true);
-
 	}
 	
 	/*
@@ -186,10 +220,13 @@ public class FractalExplorer {
 	* В цикле идёт проход по всем пикселям и определяется, входит ли он в площадь фрактала
 	* Степень входа определяется цветом пикселя.
 	*/
-	/*
-	public void drawFractal() {
+	
+	public void drawFractal(int index) {
 		
 		//System.out.println("Range = " + range.x + ", " + range.y + ", " + range.width + ", " + range.height + "\n");
+		
+		// Очистка картинки после предыдущего рисунка
+		this.clearImage();
 		
 		for (int x = 0; x < this.width; x++) {
 			for (int y = 0; y < this.height; y++) {
@@ -199,7 +236,7 @@ public class FractalExplorer {
 				double yCoord = FractalGenerator.getCoord(range.y, range.y + range.height, display.getHeight(), y);
 				
 				// Определение входа точки в множество Мандельброта
-				int numOfIter = mandelbrot.numIterations(xCoord, yCoord);
+				int numOfIter = fractals.get(index).numIterations(xCoord, yCoord);
 				
 				// Логирование количества итераций каждой точки
 				//if (numOfIter > 50)
@@ -216,19 +253,28 @@ public class FractalExplorer {
 					//display.drawPixel(x, y, Color.black);
 				}
 				
-				
 				display.drawPixel(x, y, new Color(rgbColor));
 				
 			}
 		}
 	}
+	
+	/*
+	* Управление панелью для рисования
 	*/
+	public void setStartImage() {
+		this.display.setStartImage();
+	}
+	
+	public void clearImage() {
+		this.display.clearImage();
+	}
+	
 	/*
 	* Точка входа
 	*/
 	public static void main(String[] args) {
 		FractalExplorer explorer = new FractalExplorer(600);
 		explorer.createAndShowGUI();
-		//explorer.drawFractal();
 	}
 }

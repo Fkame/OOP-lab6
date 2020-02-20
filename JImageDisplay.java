@@ -72,6 +72,8 @@ public class JImageDisplay extends JPanel {
 	}
 	
 	public void setStartImage() {
+		this.clearImage();
+		
 		g.setColor(Color.orange);
 		g.fillRect(bImg.getWidth() / 2 - 51, bImg.getHeight() / 2 - 51, 100, 100);	
 		g.setColor(Color.white);
